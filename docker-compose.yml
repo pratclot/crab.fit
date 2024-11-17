@@ -1,0 +1,29 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=http://localhost:3001
+    ports:
+      - "3080:3000"
+    depends_on:
+      - api
+    env_file: ./frontend/.env
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+      args:
+        - STORAGE_ADAPTOR=sql-adaptor
+    ports:
+      - "3001:3000"
+    environment:
+      - DATABASE_URL=sqlite:///app/db/crabfit.sqlite
+      - FRONTEND_URL=http://localhost:3080
+    volumes:
+      - crabfit-db:/app/db
+    entrypoint: ["sh", "-c", "touch /app/db/crabfit.sqlite && ./api"]
+
+volumes:
+  crabfit-db:
